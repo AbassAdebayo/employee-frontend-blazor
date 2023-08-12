@@ -1,0 +1,123 @@
+@page "/employee-percentage"
+
+@inherits LayoutComponentBase
+
+<div class="container">
+    <div class="sphere">
+        <div class="male-section" style="background: linear-gradient(to bottom, #007bff 0%, #007bff @malePercentage%, transparent @malePercentage%, transparent 100%)">
+            <span class="gender-label male-label">Male</span>
+        </div>
+        <div class="female-section" style="background: linear-gradient(to bottom, #ff69b4 0%, #ff69b4 @femalePercentage%, transparent @femalePercentage%, transparent 100%)">
+            <span class="gender-label female-label">Female</span>
+        </div>
+    </div>
+    <div class="percentage-labels">
+        <span class="percentage-label male-percentage">@malePercentage%</span>
+        <span class="percentage-label female-percentage">@femalePercentage%</span>
+    </div>
+</div>
+
+
+<style>
+   .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .sphere {
+        width: 200px;
+        height: 200px;
+        background-color: #f0f0f0;
+        border-radius: 50%;
+        position: relative;
+    }
+
+    .male-section,
+    .female-section {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        position: absolute;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    .gender-label,
+    .percentage-label {
+        position: absolute;
+        text-align: center;
+        width: 100%;
+        color: white;
+    }
+
+    .male-label {
+        top: 35%;
+        font-size: 14px;
+    }
+
+    .female-label {
+        top: 35%;
+        font-size: 14px;
+    }
+
+    .male-percentage,
+    .female-percentage {
+        top: 45%;
+        font-size: 12px;
+    }
+
+    .percentage-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: -1rem;
+    }
+
+
+</style>
+
+@code {
+
+    private EmployeeModel employee = new EmployeeModel();
+
+    [Inject]
+    private EmployeeService _employeeService { get; set; }
+
+    private MarkupString SphereHtml;
+
+    private int? maleCount;
+    private int? femaleCount;
+    private double malePercentage;
+    private double femalePercentage;
+
+    
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch employee data from API
+        var employees = await _employeeService.GetAllEmployeesAsync();
+
+        // Group employees by gender and count
+        maleCount = employees.Count(e => e.Gender == "M" || e.Gender == "Male");
+        femaleCount = employees.Count(e => e.Gender == "F");
+
+        // Calculate percentages
+        CalculatePercentages();
+    }
+
+    private void CalculatePercentages()
+    {
+        if (maleCount.HasValue && femaleCount.HasValue && (maleCount.Value + femaleCount.Value) != 0)
+        {
+            malePercentage = (double)maleCount.Value / (maleCount.Value + femaleCount.Value) * 100;
+            femalePercentage = (double)femaleCount.Value / (maleCount.Value + femaleCount.Value) * 100;
+
+
+        
+        }
+    }
+
+    
+
+}

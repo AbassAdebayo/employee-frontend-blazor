@@ -1,0 +1,87 @@
+@inject NavigationManager _navigationManager
+@inject IJSRuntime JSRuntime
+@inject NotificationService _notificationService
+@page "/create"
+
+
+
+<h3>Create Employee</h3>
+
+<EditForm Model="employee" OnValidSubmit="CreateNewEmployee">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="firstName">First Name:</label>
+        <InputText id="firstName" class="form-control" @bind-Value="employee.FirstName" />
+    </div>
+
+    <div class="form-group">
+        <label for="lastName">Last Name:</label>
+        <InputText id="lastName" class="form-control" @bind-Value="employee.LastName" />
+    </div>
+
+    <div class="form-group">
+        <label for="phoneNumber">Phone Number:</label>
+        <InputText id="phoneNumber" class="form-control" @bind-Value="employee.PhoneNumber" />
+    </div>
+
+    <div class="form-group">
+        <label for="address">Address:</label>
+        <InputText id="address" class="form-control" @bind-Value="employee.Address" />
+    </div>
+
+    <div class="form-group">
+        <label for="gender">Gender:</label>
+        <select id="gender" class="form-control" @bind="employee.Gender">
+            <option value="">select gender</option>
+            <option value="M">M</option>
+            <option value="F">F</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <InputText id="email" class="form-control" @bind-Value="employee.Email" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</EditForm>
+
+@code {
+    private EmployeeModel employee = new EmployeeModel();
+
+    [Inject]
+    private EmployeeService employeeService { get; set; }
+
+
+
+    private async Task CreateNewEmployee()
+    {   
+        // Check if email has been already registered
+        var emailExists = await employeeService.EmployeeExistsByEmail(employee.Email);
+        if(emailExists == true)
+        {
+            _notificationService.ShowNotification($"The email: {employee.Email} has been already registered!");
+            await Task.Delay(3000);
+            StateHasChanged();
+        }
+        else
+        {
+            // Call the CreateEmployee method from the EmployeeService
+            var result = await employeeService.CreateEmployee(employee);
+            _notificationService.ShowNotification($"Employee Created Successfully");
+
+        
+            await Task.Delay(3000); 
+            _navigationManager.NavigateTo("/employees");
+        }
+        
+
+        
+
+        
+            
+    
+    }
+}
